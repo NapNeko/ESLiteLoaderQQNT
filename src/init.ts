@@ -1,10 +1,10 @@
-require("./liteloader_api/main.js");
-require("./loader_core/plugin_loader.js");
-require("./main.js");
+import "./liteloader_api/main.js";
+import "./loader_core/plugin_loader.js";
+import "./main.js";
 
-const { app, dialog } = require("electron");
-const path = require("path");
-const fs = require("fs");
+import { app, dialog } from "electron";
+import path from "path";
+import fs from "fs";
 
 let isLatest = true;
 let preloads = {};
