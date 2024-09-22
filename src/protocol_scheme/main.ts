@@ -1,5 +1,5 @@
-const { app, protocol, net } = require("electron");
-const path = require("path");
+import { app, protocol, net } from "electron";
+import path from "path";
 
 
 app.on("ready", () => {
@@ -25,7 +25,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 
-exports.protocolRegister = (protocol) => {
+export let protocolRegister = (protocol: { isProtocolRegistered: (arg0: string) => any; handle: (arg0: string, arg1: (req: any) => Promise<Response>) => void; }) => {
     if (!protocol.isProtocolRegistered("local")) {
         protocol.handle("local", (req) => {
             const { host, pathname } = new URL(decodeURI(req.url));

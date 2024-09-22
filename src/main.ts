@@ -1,12 +1,12 @@
-const { MainLoader } = require("./loader_core/main.js");
-const { protocolRegister } = require("./protocol_scheme/main.js");
-const path = require("path");
+import { MainLoader } from "./loader_core/main.js";
+import { protocolRegister } from "./protocol_scheme/main.js";
+import path from "path";
 
 
 const loader = new MainLoader().init();
 
 
-function processPreloadPath(preload_path) {
+function processPreloadPath(preload_path: string) {
     if (preload_path?.includes?.(process.resourcesPath)) {
         const preload_dirname = path.dirname(preload_path);
         const preload_basename = path.basename(preload_path);
@@ -18,7 +18,7 @@ function processPreloadPath(preload_path) {
 }
 
 
-function proxyBrowserWindowConstruct(target, [config], newTarget) {
+function proxyBrowserWindowConstruct(target: any, [config]: [any], newTarget: any): object {
     const window = Reflect.construct(target, [
         {
             ...config,
@@ -55,7 +55,7 @@ function proxyBrowserWindowConstruct(target, [config], newTarget) {
 
 
 // 监听窗口创建
-require.cache["electron"] = new Proxy(require.cache["electron"], {
+require.cache["electron"] = new Proxy(require.cache["electron"] as NodeModule, {
     get(target, property, receiver) {
         const electron = Reflect.get(target, property, receiver);
         return property != "exports" ? electron : new Proxy(electron, {

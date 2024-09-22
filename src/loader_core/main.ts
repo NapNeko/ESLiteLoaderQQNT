@@ -1,11 +1,11 @@
-function topologicalSort(dependencies) {
-    const sorted = [];
+function topologicalSort(dependencies: any[]) {
+    const sorted: any[] = [];
     const visited = new Set();
-    const visit = (slug) => {
+    const visit = (slug: string) => {
         if (visited.has(slug)) return;
         visited.add(slug);
         const plugin = LiteLoader.plugins[slug];
-        plugin.manifest.dependencies?.forEach(depSlug => visit(depSlug));
+        plugin.manifest.dependencies?.forEach((depSlug: any) => visit(depSlug));
         sorted.push(slug);
     }
     dependencies.forEach(slug => visit(slug));
@@ -13,10 +13,8 @@ function topologicalSort(dependencies) {
 }
 
 
-exports.MainLoader = class {
-
-    #exports = {};
-
+export class MainLoader {
+    #exports: { [key: string]: any } = {};
     init() {
         // 加载插件
         for (const slug of topologicalSort(Object.keys(LiteLoader.plugins))) {
@@ -28,22 +26,23 @@ exports.MainLoader = class {
                 try {
                     this.#exports[slug] = require(plugin.path.injects.main);
                 }
-                catch (e) {
-                    plugin.error = { message: `[Main] ${e.message}`, stack: e.stack };
+                catch (e: unknown) {
+                    const error = e as Error;
+                    plugin.error = { message: `[Main] ${error.message}`, stack: error.stack };
                 }
             }
         }
         return this;
     }
 
-    onBrowserWindowCreated(window) {
+    onBrowserWindowCreated(window: unknown) {
         for (const slug in this.#exports) {
             const plugin = this.#exports[slug];
             plugin.onBrowserWindowCreated?.(window);
         }
     }
 
-    onLogin(uid) {
+    onLogin(uid: any) {
         for (const slug in this.#exports) {
             const plugin = this.#exports[slug];
             plugin.onLogin?.(uid);

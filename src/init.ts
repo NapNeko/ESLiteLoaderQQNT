@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs";
 
 let isLatest = true;
-let preloads = {};
+let preloads: { [key: string]: string } = {};
 
 const liteloader_preload_path = path.join(LiteLoader.path.root, "src/preload.js");
 const qqnt_application_path = (() => {
