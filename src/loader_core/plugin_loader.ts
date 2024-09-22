@@ -1,4 +1,4 @@
-import { app, dialog } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -30,7 +30,8 @@ function deletePlugin(slug: string) {
     catch (error) {
         output("Deleting Plugin Error", error);
         app.on("ready", () => {
-            dialog.showMessageBox(null, {
+            const mainWindow = BrowserWindow.getAllWindows()[0];
+            dialog.showMessageBox(mainWindow, {
                 type: "error",
                 title: "LiteLoaderQQNT",
                 message: `删除插件时报错，请检查并手动删除\n${error}`
@@ -61,7 +62,8 @@ function InstallPlugin(slug: string) {
     catch (error) {
         output("Installing Plugin Error", error);
         app.on("ready", () => {
-            dialog.showMessageBox(null, {
+            const mainWindow = BrowserWindow.getAllWindows()[0];
+            dialog.showMessageBox(mainWindow, {
                 type: "error",
                 title: "LiteLoaderQQNT",
                 message: `安装插件时报错，请检查并手动安装\n${error}`
@@ -91,7 +93,8 @@ function findAllPlugin() {
     catch (error) {
         output("Find Plugin Error", error);
         app.on("ready", () => {
-            dialog.showMessageBox(null, {
+            const mainWindow = BrowserWindow.getAllWindows()[0];
+            dialog.showMessageBox(mainWindow, {
                 type: "warning",
                 title: "LiteLoaderQQNT",
                 message: `在读取数据目录时报错了！请检查插件目录或忽略继续启动\n${error}`
@@ -140,7 +143,8 @@ function loadAllPlugin() {
     for (const slug of missing) {
         output("Missing Plugin:", slug);
         app.on("ready", () => {
-            dialog.showMessageBox(null, {
+            const mainWindow = BrowserWindow.getAllWindows()[0];
+            dialog.showMessageBox(mainWindow, {
                 type: "warning",
                 title: "LiteLoaderQQNT",
                 message: `插件缺少依赖：${slug}`

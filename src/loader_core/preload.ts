@@ -29,7 +29,7 @@ function topologicalSort(dependencies: any[]) {
                 try {
                     runPreloadScript(await (await fetch(`local:///${plugin.path.injects.preload}`)).text());
                 }
-                catch (e) {
+                catch (e: any) {
                     preloadErrors[slug] = { message: `[Preload] ${e.message}`, stack: e.stack };
                 }
             }

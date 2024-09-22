@@ -2,6 +2,7 @@ import default_config from "../settings/static/config.json";
 import { ipcMain, shell } from "electron";
 import path from "node:path";
 import fs from "node:fs";
+import { URL } from "url";
 
 const admZip = (() => {
     const major_node = path.join(process.resourcesPath, "app/major.node");
@@ -28,7 +29,7 @@ const qqnt_version = (() => {
 })();
 
 
-function setConfig(slug, new_config) {
+function setConfig(slug: string, new_config: any) {
     try {
         const config_path = path.join(data_path, slug, "config.json");
         fs.mkdirSync(path.dirname(config_path), { recursive: true });
@@ -40,7 +41,7 @@ function setConfig(slug, new_config) {
 }
 
 
-function getConfig(slug, default_config) {
+function getConfig(slug: string, default_config: any) {
     try {
         const config_path = path.join(data_path, slug, "config.json");
         if (fs.existsSync(config_path)) {
@@ -57,7 +58,7 @@ function getConfig(slug, default_config) {
 }
 
 
-function pluginInstall(plugin_path, undone = false) {
+function pluginInstall(plugin_path: string, undone = false) {
     try {
         if (fs.statSync(plugin_path).isFile()) {
             // 通过 ZIP 格式文件安装插件
@@ -99,7 +100,7 @@ function pluginInstall(plugin_path, undone = false) {
 }
 
 
-function pluginDelete(slug, delete_data = false, undone = false) {
+function pluginDelete(slug: string, delete_data = false, undone = false) {
     if (!(slug in LiteLoader.plugins)) return true;
     const { plugin, data } = LiteLoader.plugins[slug].path;
     const config = LiteLoader.api.config.get("LiteLoader", default_config);
@@ -112,9 +113,9 @@ function pluginDelete(slug, delete_data = false, undone = false) {
 }
 
 
-function pluginDisable(slug, undone = false) {
+function pluginDisable(slug: string, undone = false) {
     const config = LiteLoader.api.config.get("LiteLoader", default_config);
-    if (undone) config.disabled_plugins = config.disabled_plugins.filter(item => item != slug);
+    if (undone) config.disabled_plugins = config.disabled_plugins.filter((item: string) => item != slug);
     else config.disabled_plugins = config.disabled_plugins.concat(slug);
     LiteLoader.api.config.set("LiteLoader", config);
 }
@@ -141,7 +142,7 @@ const LiteLoader = {
         liteloader: liteloader_package,
         qqnt: qqnt_package
     },
-    plugins: {},
+    plugins: {} as Record<string, { path: { plugin: string, data: string } }>,
     api: {
         config: {
             set: setConfig,
@@ -191,10 +192,10 @@ ipcMain.on("LiteLoader.LiteLoader.LiteLoader", (event) => {
 });
 
 
-ipcMain.handle("LiteLoader.LiteLoader.api", (event, name, method, args) => {
+ipcMain.handle("LiteLoader.LiteLoader.api", (event, name: keyof typeof LiteLoader.api, method: string, args: any[]) => {
     try {
-        if (name == method) return LiteLoader.api[method](...args);
-        else return LiteLoader.api[name][method](...args);
+        if (name == method) return (LiteLoader.api as any)[method](...args);
+        else return (LiteLoader.api as any)[name][method](...args);
     } catch (error) {
         return null;
     }

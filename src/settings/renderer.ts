@@ -205,7 +205,7 @@ async function initVersions(view: HTMLDivElement) {
 
 
 async function initPluginList(view: HTMLDivElement) {
-    const plugin_item_template = view.querySelector("#plugin-item");
+    const plugin_item_template = view.querySelector("#plugin-item") as HTMLTemplateElement;
     const plugin_install_button = view.querySelector(".plugins .plugin .install setting-button");
     const plugin_loader_switch = view.querySelector(".plugins .plugin .loader setting-switch");
     const plugin_lists = {
@@ -220,7 +220,7 @@ async function initPluginList(view: HTMLDivElement) {
     input_file.addEventListener("change", async () => {
         const filepath = input_file.files?.[0]?.path;
         const config = await LiteLoader.api.config.get("LiteLoader", default_config);
-        const has_install = Object.values(config.installing_plugins).some(item => item.plugin_path == filepath);
+        const has_install = Object.values(config.installing_plugins).some((item) => (item as { plugin_path: string }).plugin_path == filepath);
         const is_install = await LiteLoader.api.plugin.install(filepath, has_install);
         alert(is_install ? (has_install ? "已取消安装此插件" : "将在下次启动时安装") : "无法安装无效插件");
         input_file.value = '';
@@ -239,10 +239,11 @@ async function initPluginList(view: HTMLDivElement) {
     const plugin_counts = {
         extension: 0,
         theme: 0,
-        framework: 0
+        framework: 0,
+        total: 0
     }
 
-    for (const [slug, plugin] of Object.entries(LiteLoader.plugins)) {
+    for (const [slug, plugin] of Object.entries(LiteLoader.plugins) as [string, any][]) {
         // 跳过不兼容插件
         if (plugin.incompatible) {
             continue;
@@ -257,7 +258,7 @@ async function initPluginList(view: HTMLDivElement) {
             console.error("plugin_item_template is null");
             return;
         }
-        const plugin_item = plugin_item_template.content.cloneNode(true);
+        const plugin_item = plugin_item_template.content.cloneNode(true) as HTMLElement;
 
         const plugin_item_icon = plugin_item.querySelector(".icon");
         const plugin_item_name = plugin_item.querySelector(".name");
@@ -267,27 +268,35 @@ async function initPluginList(view: HTMLDivElement) {
         const plugin_item_repo = plugin_item.querySelector(".repo");
         const plugin_item_manager = plugin_item.querySelector(".manager");
         const plugin_item_manager_modal = plugin_item.querySelector(".manager-modal");
-        const manager_modal_enable = plugin_item_manager_modal.querySelector(".enable");
-        const manager_modal_keepdata = plugin_item_manager_modal.querySelector(".keepdata");
-        const manager_modal_uninstall = plugin_item_manager_modal.querySelector(".uninstall");
+        const manager_modal_enable = plugin_item_manager_modal?.querySelector(".enable");
+        const manager_modal_keepdata = plugin_item_manager_modal?.querySelector(".keepdata");
+        const manager_modal_uninstall = plugin_item_manager_modal?.querySelector(".uninstall");
 
-        plugin_item_icon.innerHTML = await appropriateIcon(icon);
-        plugin_item_name.textContent = plugin.manifest.name;
-        plugin_item_name.title = plugin.manifest.name;
-        plugin_item_description.textContent = plugin.manifest.description;
-        plugin_item_description.title = plugin.manifest.description;
+        if (plugin_item_icon) {
+            plugin_item_icon.innerHTML = await appropriateIcon(icon);
+        }
+        if (plugin_item_name) {
+            plugin_item_name.textContent = plugin.manifest.name;
+            (plugin_item_name as HTMLElement).title = plugin.manifest.name;
+        }
+        if (plugin_item_description) {
+            plugin_item_description.textContent = plugin.manifest.description;
+            (plugin_item_description as HTMLElement).title = plugin.manifest.description;
+        }
 
         const version_link = document.createElement("setting-link");
         version_link.textContent = plugin.manifest.version;
-        plugin_item_version.append(version_link);
+        if (plugin_item_version) {
+            plugin_item_version.append(version_link);
+        }
 
-        plugin.manifest.authors?.forEach((author, index, array) => {
+        plugin.manifest.authors?.forEach((author: { name: string | null; link: string | undefined; }, index: number, array: string | any[]) => {
             const author_link = document.createElement("setting-link");
             author_link.textContent = author.name;
             author_link.dataset["value"] = author.link;
-            plugin_item_authors.append(author_link);
+            plugin_item_authors?.append(author_link);
             if (index < array.length - 1) {
-                plugin_item_authors.append(" | ");
+                plugin_item_authors?.append(" | ");
             }
         });
 
@@ -296,47 +305,59 @@ async function initPluginList(view: HTMLDivElement) {
             const repo_link = document.createElement("setting-link");
             repo_link.textContent = repo;
             repo_link.dataset["value"] = `https://github.com/${repo}/tree/${branch}`;
-            plugin_item_repo.append(repo_link);
-        } else plugin_item_repo.textContent = "暂无仓库信息";
+            if (plugin_item_repo) {
+                plugin_item_repo.append(repo_link);
+            }
+        } else if (plugin_item_repo) {
+            plugin_item_repo.textContent = "暂无仓库信息";
+        }
 
-        plugin_item_manager_modal.dataset["title"] = plugin.manifest.name;
+        if (plugin_item_manager_modal) {
+            (plugin_item_manager_modal as HTMLElement).dataset["title"] = plugin.manifest.name;
+        }
 
-        plugin_item_manager.addEventListener("click", () => {
-            plugin_item_manager_modal.toggleAttribute("is-active");
+        plugin_item_manager?.addEventListener("click", () => {
+            plugin_item_manager_modal?.toggleAttribute("is-active");
         });
 
-        manager_modal_enable.toggleAttribute("is-active", !config.disabled_plugins.includes(slug));
-        manager_modal_enable.addEventListener("click", () => {
+        manager_modal_enable?.toggleAttribute("is-active", !config.disabled_plugins.includes(slug));
+        manager_modal_enable?.addEventListener("click", () => {
             const isActive = manager_modal_enable.hasAttribute("is-active");
             manager_modal_enable.toggleAttribute("is-active", !isActive);
             LiteLoader.api.plugin.disable(slug, !isActive);
         });
 
-        manager_modal_keepdata.toggleAttribute("is-active", !!config.deleting_plugins?.[slug]?.data_path);
-        manager_modal_keepdata.addEventListener("click", async () => {
+        manager_modal_keepdata?.toggleAttribute("is-active", !!config.deleting_plugins?.[slug]?.data_path);
+        manager_modal_keepdata?.addEventListener("click", async () => {
             const isActive = manager_modal_keepdata.hasAttribute("is-active");
             manager_modal_keepdata.toggleAttribute("is-active", !isActive);
             const config = await LiteLoader.api.config.get("LiteLoader", default_config);
             if (slug in config.deleting_plugins) LiteLoader.api.plugin.delete(slug, !isActive, false);
         });
 
-        manager_modal_uninstall.toggleAttribute("is-active", !!config.deleting_plugins?.[slug]);
-        manager_modal_uninstall.addEventListener("click", () => {
+        manager_modal_uninstall?.toggleAttribute("is-active", !!config.deleting_plugins?.[slug]);
+        manager_modal_uninstall?.addEventListener("click", () => {
             const isActive = manager_modal_uninstall.hasAttribute("is-active");
             manager_modal_uninstall.toggleAttribute("is-active", !isActive);
-            const keepdata = manager_modal_keepdata.hasAttribute("is-active");
+            const keepdata = manager_modal_keepdata?.hasAttribute("is-active");
             LiteLoader.api.plugin.delete(slug, keepdata, isActive);
         });
 
-        plugin_list.append(plugin_item);
+        plugin_list?.append(plugin_item);
 
         plugin_counts.total++;
-        plugin_counts[plugin.manifest.type]++;
+        plugin_counts[plugin.manifest.type as 'extension' | 'theme' | 'framework']++;
     }
 
-    plugin_lists.extension.dataset["title"] = `扩展 （ ${plugin_counts.extension} 个插件 ）`;
-    plugin_lists.theme.dataset["title"] = `主题 （ ${plugin_counts.theme} 个插件 ）`;
-    plugin_lists.framework.dataset["title"] = `依赖 （ ${plugin_counts.framework} 个插件 ）`;
+    if (plugin_lists.extension) {
+        (plugin_lists.extension as HTMLElement).dataset["title"] = `扩展 （ ${plugin_counts.extension} 个插件 ）`;
+    }
+    if (plugin_lists.theme) {
+        (plugin_lists.theme as HTMLElement).dataset["title"] = `主题 （ ${plugin_counts.theme} 个插件 ）`;
+    }
+    if (plugin_lists.framework) {
+        (plugin_lists.framework as HTMLElement).dataset["title"] = `依赖 （ ${plugin_counts.framework} 个插件 ）`;
+    }
 }
 
 
