@@ -25,15 +25,22 @@ Object.defineProperty(globalThis, "SettingElementStyleSheets", {
     }
 });
 
-
+export interface SettingElementStyleSheets {
+    styleSheets: CSSStyleSheet[];
+    on(callback: (styleSheets: CSSStyleSheet[]) => void): void;
+}
 class SettingElementBase extends HTMLElement {
+    private _template: HTMLElement | null;
+    private _content: any;
+    private _slot: HTMLSlotElement | null;
     constructor(element_id) {
         super();
         this.attachShadow({ mode: "open" });
         this._template = template.getElementById(element_id);
-        this._content = this._template.content.cloneNode(true);
-        this._slot = this.shadowRoot.querySelector("slot");
-        this.shadowRoot.append(this._content);
+        this._content = (this._template as HTMLTemplateElement)?.content?.cloneNode(true);
+        this._slot = this.shadowRoot!.querySelector("slot");
+        this.shadowRoot?.append(this._content);
+
         SettingElementStyleSheets.on((styleSheets) => {
             this.shadowRoot.adoptedStyleSheets = styleSheets;
         });
