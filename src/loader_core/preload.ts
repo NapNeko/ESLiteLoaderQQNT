@@ -1,14 +1,14 @@
-const { contextBridge } = require("electron");
+import { contextBridge } from "electron";
 
 
-function topologicalSort(dependencies) {
-    const sorted = [];
+function topologicalSort(dependencies: any[]) {
+    const sorted: any[] = [];
     const visited = new Set();
-    const visit = (slug) => {
+    const visit = (slug: string) => {
         if (visited.has(slug)) return;
         visited.add(slug);
         const plugin = LiteLoader.plugins[slug];
-        plugin.manifest.dependencies?.forEach(depSlug => visit(depSlug));
+        plugin.manifest.dependencies?.forEach((depSlug: string) => visit(depSlug));
         sorted.push(slug);
     }
     dependencies.forEach(slug => visit(slug));
@@ -19,7 +19,7 @@ function topologicalSort(dependencies) {
 (new class {
 
     async init() {
-        const preloadErrors = {}
+        const preloadErrors: { [key: string]: { message: string, stack: string } } = {}
         for (const slug of topologicalSort(Object.keys(LiteLoader.plugins))) {
             const plugin = LiteLoader.plugins[slug];
             if (plugin.disabled || plugin.incompatible || plugin.error) {

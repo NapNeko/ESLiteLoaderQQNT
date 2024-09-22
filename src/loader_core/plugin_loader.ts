@@ -1,8 +1,8 @@
-const { app, dialog } = require("electron");
-const path = require("node:path");
-const fs = require("node:fs");
+import { app, dialog } from "electron";
+import path from "node:path";
+import fs from "node:fs";
 
-const default_config = require("../settings/static/config.json");
+import default_config from "../settings/static/config.json";
 
 const admZip = (() => {
     const major_node = path.join(process.resourcesPath, "app/major.node");
@@ -17,11 +17,11 @@ const admZip = (() => {
 })();
 
 
-const output = (...args) => console.log("\x1b[32m%s\x1b[0m", "[LiteLoader]", ...args);
+const output = (...args: any[]) => console.log("\x1b[32m%s\x1b[0m", "[LiteLoader]", ...args);
 const config = LiteLoader.api.config.get("LiteLoader", default_config);
 
 
-function deletePlugin(slug) {
+function deletePlugin(slug: string) {
     try {
         const { plugin_path, data_path } = config.deleting_plugins[slug];
         if (data_path) fs.rmSync(data_path, { recursive: true });
@@ -44,12 +44,12 @@ function deletePlugin(slug) {
 }
 
 
-function InstallPlugin(slug) {
+function InstallPlugin(slug: string) {
     try {
         const { plugin_path, plugin_type } = config.installing_plugins[slug];
         const dest_path = path.join(LiteLoader.path.plugins, slug);
         if (fs.existsSync(dest_path)) {
-            fs.renameSync(dest_path, `${dest_path}_${parseInt(Math.random() * 100000)} `);
+            fs.renameSync(dest_path, `${dest_path}_${parseInt((Math.random() * 100000).toString())} `);
         }
         if (plugin_type == "zip") {
             new admZip(plugin_path).extractAllTo(dest_path);
@@ -102,7 +102,7 @@ function findAllPlugin() {
 }
 
 
-function getPluginInfo(pathname, manifest) {
+function getPluginInfo(pathname: string, manifest: { platform: string | any[]; slug: string; injects: { main: any; preload: any; renderer: any; }; }) {
     const incompatible_platform = !manifest.platform.includes(LiteLoader.os.platform);
     const disabled_plugin = config.disabled_plugins.includes(manifest.slug);
     const plugin_path = path.join(LiteLoader.path.plugins, pathname);
@@ -133,7 +133,7 @@ function loadAllPlugin() {
     for (const { pathname, manifest } of plugins) {
         output("Found Plugin:", manifest.name);
         LiteLoader.plugins[manifest.slug] = getPluginInfo(pathname, manifest);
-        manifest.dependencies?.forEach?.(slug => dependencies.add(slug));
+        manifest.dependencies?.forEach?.((slug: unknown) => dependencies.add(slug));
     }
     const slugs = plugins.map(plugin => plugin.manifest.slug);
     const missing = [...dependencies].filter(slug => !slugs.includes(slug));
