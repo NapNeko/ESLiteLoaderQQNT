@@ -1,6 +1,6 @@
 // 寻找指定元素
-async function findElement(selector, callback) {
-    const observer = (_, observer) => {
+async function findElement(selector: any, callback: (arg0: any) => void) {
+    const observer = (_: MutationRecord[] | undefined, observer: { disconnect: () => void; } | undefined) => {
         const element = document.querySelector(selector);
         if (element) {
             callback(element);
@@ -9,7 +9,7 @@ async function findElement(selector, callback) {
         }
         return false;
     }
-    if (!observer()) {
+    if (!observer(undefined, undefined)) {
         new MutationObserver(observer).observe(document, {
             subtree: true,
             attributes: false,
@@ -20,7 +20,7 @@ async function findElement(selector, callback) {
 
 
 // 监听页面变化
-async function watchURLHash(callback) {
+async function watchURLHash(callback: { (currentHash: any): Promise<void>; (arg0: string): void; }) {
     if (!location.hash.includes("#/blank")) {
         callback(location.hash);
     }
@@ -33,7 +33,7 @@ async function watchURLHash(callback) {
 
 
 // 加载彩蛋
-async function loadEasterEggs(currentHash) {
+async function loadEasterEggs(currentHash: string) {
     const easter_eggs = [
         "./check_update.js",
         "./search_furry.js",

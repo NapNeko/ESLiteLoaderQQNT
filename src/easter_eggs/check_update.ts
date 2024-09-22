@@ -1,6 +1,6 @@
 export const hash = "#/setting";
 export const selector = ".config_view .versions .new setting-button";
-export function trigger(check_update_button) {
+export function trigger(check_update_button: { addEventListener: (arg0: string, arg1: () => void) => void; }) {
     let click_count = 0;
     check_update_button.addEventListener("click", () => {
         click_count++;

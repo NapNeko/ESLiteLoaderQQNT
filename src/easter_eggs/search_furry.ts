@@ -1,6 +1,6 @@
 export const hash = "#/main";
 export const selector = ".contact-top-bar";
-export function trigger(contact_topbar) {
+export function trigger(contact_topbar: { querySelector: (arg0: string) => any; }) {
     const search_word = "furry";
     const images_apis = [
         "https://uapis.cn/api/imgapi/furry/img4k.php",
@@ -24,7 +24,7 @@ export function trigger(contact_topbar) {
     const adder_button = contact_topbar.querySelector(".contact-adder-btn");
     const search_input = contact_topbar.querySelector("input");
 
-    menu_item.addEventListener("click", () => {
+    menu_item?.addEventListener("click", () => {
         const random_image = images_apis[Math.floor(Math.random() * images_apis.length)];
         LiteLoader.api.openExternal(random_image);
     });
@@ -32,7 +32,9 @@ export function trigger(contact_topbar) {
     adder_button.addEventListener("click", () => {
         if (search_input.value.toLowerCase() == search_word) {
             const context_menu = document.querySelector(".q-context-menu");
-            context_menu.append(menu_item);
+            if (menu_item) {
+                context_menu?.append(menu_item);
+            }
         }
     });
 }

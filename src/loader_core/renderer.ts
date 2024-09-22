@@ -1,26 +1,26 @@
-function topologicalSort(dependencies) {
-    const sorted = [];
+import { SettingInterface } from "@/settings/renderer";
+
+function topologicalSort(dependencies: any[]) {
+    const sorted: any[] = [];
     const visited = new Set();
-    const visit = (slug) => {
+    const visit = (slug: string) => {
         if (visited.has(slug)) return;
         visited.add(slug);
         const plugin = LiteLoader.plugins[slug];
-        plugin.manifest.dependencies?.forEach(depSlug => visit(depSlug));
+        plugin.manifest.dependencies?.forEach((depSlug: string) => visit(depSlug));
         sorted.push(slug);
     }
     dependencies.forEach(slug => visit(slug));
     return sorted;
 }
-
-
 export class RendererLoader {
 
-    #exports = {};
+    #exports: { [key: string]: any } = {};
 
     async init() {
         // 确保preload加载完毕
         if (!window.LiteLoaderPreloadErrors) {
-            await new Promise(resolve => {
+            await new Promise<void>(resolve => {
                 const check = () => (window.LiteLoaderPreloadErrors ? resolve() : setTimeout(check));
                 check();
             });
@@ -40,7 +40,7 @@ export class RendererLoader {
                 try {
                     this.#exports[slug] = await import(`local:///${plugin.path.injects.renderer}`);
                 }
-                catch (e) {
+                catch (e: any) {
                     this.#exports[slug] = { error: { message: `[Renderer] ${e.message}`, stack: e.stack } };
                 }
             }
@@ -48,7 +48,7 @@ export class RendererLoader {
         return this;
     }
 
-    onSettingWindowCreated(settingInterface) {
+    onSettingWindowCreated(settingInterface: SettingInterface) {
         for (const slug in this.#exports) {
             const plugin = this.#exports[slug];
             try {
@@ -57,19 +57,20 @@ export class RendererLoader {
             }
             catch (e) {
                 const view = settingInterface.add(LiteLoader.plugins[slug]);
-                settingInterface.createErrorView(e, slug, view);
+                const formattedError = { message: (e as Error).message, stack: (e as Error).stack };
+                settingInterface.createErrorView(formattedError, slug, view);
             }
         }
     }
 
-    onVueComponentMount(component) {
+    onVueComponentMount(component: { vnode: any; }) {
         for (const slug in this.#exports) {
             const plugin = this.#exports[slug];
             plugin.onVueComponentMount?.(component);
         }
     }
 
-    onVueComponentUnmount(component) {
+    onVueComponentUnmount(component: { vnode: any; }) {
         for (const slug in this.#exports) {
             const plugin = this.#exports[slug];
             plugin.onVueComponentUnmount?.(component);
