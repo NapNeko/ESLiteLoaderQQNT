@@ -8,7 +8,7 @@ const template = new DOMParser().parseFromString(html_file, "text/html");
 Object.defineProperty(globalThis, "SettingElementStyleSheets", {
     value: new class {
         #styleSheets = [];
-        #callbacks = [];
+        #callbacks: ((styleSheets: CSSStyleSheet[]) => void)[] = [];
         set styleSheets(value) {
             this.#styleSheets = value;
             for (const callback of this.#callbacks) {
@@ -18,7 +18,7 @@ Object.defineProperty(globalThis, "SettingElementStyleSheets", {
         get styleSheets() {
             return this.#styleSheets;
         }
-        on(callback) {
+        on(callback: (styleSheets: CSSStyleSheet[]) => void) {
             this.#callbacks.push(callback);
             callback(this.#styleSheets);
         }
