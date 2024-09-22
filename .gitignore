@@ -2,3 +2,4 @@ plugins
 data
 application
 node_modules
+dist
