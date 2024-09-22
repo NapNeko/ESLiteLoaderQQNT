@@ -1,7 +1,7 @@
 import { MainLoader } from "./loader_core/main.js";
 import { protocolRegister } from "./protocol_scheme/main.js";
 import path from "path";
-
+import { BrowserWindow } from "electron";
 
 const loader = new MainLoader().init();
 
@@ -18,8 +18,10 @@ function processPreloadPath(preload_path: string) {
 }
 
 
-function proxyBrowserWindowConstruct(target: any, [config]: [any], newTarget: any): object {
-    const window = Reflect.construct(target, [
+
+
+function proxyBrowserWindowConstruct(target: any, [config]: [any], newTarget: any): BrowserWindow {
+    const window: BrowserWindow = Reflect.construct(target, [
         {
             ...config,
             webPreferences: {

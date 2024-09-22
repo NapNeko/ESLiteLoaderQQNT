@@ -33,7 +33,7 @@ class SettingElementBase extends HTMLElement {
     private _template: HTMLElement | null;
     private _content: any;
     private _slot: HTMLSlotElement | null;
-    constructor(element_id) {
+    constructor(element_id: string) {
         super();
         this.attachShadow({ mode: "open" });
         this._template = template.getElementById(element_id);
@@ -42,7 +42,9 @@ class SettingElementBase extends HTMLElement {
         this.shadowRoot?.append(this._content);
 
         SettingElementStyleSheets.on((styleSheets) => {
-            this.shadowRoot.adoptedStyleSheets = styleSheets;
+            if (this.shadowRoot) {
+                this.shadowRoot.adoptedStyleSheets = styleSheets;
+            }
         });
     }
     attributeChangedCallback() {

@@ -3,13 +3,19 @@ import "./easter_eggs/renderer.js";
 import { SettingInterface } from "./settings/renderer.js";
 import { RendererLoader } from "./loader_core/renderer.js";
 
+//扩展 HTMLElement
+declare global {
+    interface HTMLElement {
+        __VUE__: any[];
+    }
+}
 
 const loader = await new RendererLoader().init();
 
 
 // 寻找指定元素
-function findElement(selector, callback) {
-    const observer = (_, observer) => {
+function findElement(selector: string, callback: { (): void; (arg0: any): void; }) {
+    const observer = (_: undefined | MutationRecord[], observer: { disconnect: () => void; } | undefined) => {
         const element = document.querySelector(selector);
         if (element) {
             callback(element);
@@ -18,7 +24,7 @@ function findElement(selector, callback) {
         }
         return false;
     }
-    if (!observer()) {
+    if (!observer(undefined, undefined)) {
         new MutationObserver(observer).observe(document, {
             subtree: true,
             attributes: false,
@@ -29,7 +35,7 @@ function findElement(selector, callback) {
 
 
 // 监听页面变化
-async function watchURLHash(callback) {
+async function watchURLHash(callback: { (currentHash: any): void; (arg0: string): void; }) {
     if (!location.hash.includes("#/blank")) {
         callback(location.hash);
     }
@@ -41,7 +47,7 @@ async function watchURLHash(callback) {
 }
 
 
-function loadSettingInterface(currentHash) {
+function loadSettingInterface(currentHash: string) {
     if (currentHash.includes("#/setting")) {
         const settingInterface = new SettingInterface();
         findElement(".setting-tab .nav-bar", () => {
@@ -72,7 +78,7 @@ Proxy = new Proxy(Proxy, {
 });
 
 
-function recordComponent(component) {
+function recordComponent(component: { vnode: { el: any; }; }) {
     let element = component.vnode.el;
     while (!(element instanceof HTMLElement)) {
         element = element.parentElement;
@@ -87,8 +93,8 @@ function recordComponent(component) {
 }
 
 
-function watchComponentMount(component) {
-    let value = null;
+function watchComponentMount(component: { vnode: any; }) {
+    let value: null = null;
     let hooked = false;
     Object.defineProperty(component.vnode, "el", {
         get() { return value },
@@ -107,8 +113,8 @@ function watchComponentMount(component) {
 }
 
 
-function watchComponentUnmount(component) {
-    let value = null;
+function watchComponentUnmount(component: { vnode: any; }) {
+    let value: null = null;
     let unhooked = false;
     Object.defineProperty(component, "isUnmounted", {
         get() { return value },

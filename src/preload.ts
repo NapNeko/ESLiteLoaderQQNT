@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // 运行外部脚本
 Object.defineProperty(globalThis, "runPreloadScript", {
     configurable: false,
-    value: content => new Function(
+    value: (content: string, ...args: any[]) => new Function(
         "require",
         "process",
         "Buffer",
@@ -20,7 +20,7 @@ Object.defineProperty(globalThis, "runPreloadScript", {
         "exports",
         "module",
         content
-    )(...arguments)
+    )(content, ...args)
 });
 
 
