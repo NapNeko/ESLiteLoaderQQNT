@@ -1,7 +1,7 @@
-const default_config = require("../settings/static/config.json");
-const { ipcMain, shell } = require("electron");
-const path = require("node:path");
-const fs = require("node:fs");
+import default_config from "../settings/static/config.json";
+import { ipcMain, shell } from "electron";
+import path from "node:path";
+import fs from "node:fs";
 
 const admZip = (() => {
     const major_node = path.join(process.resourcesPath, "app/major.node");
@@ -80,7 +80,7 @@ function pluginInstall(plugin_path, undone = false) {
             }
             // 通过 manifest.json 文件安装插件
             if (path.basename(plugin_path) == "manifest.json") {
-                const { slug } = JSON.parse(fs.readFileSync(plugin_path));
+                const { slug } = JSON.parse(fs.readFileSync(plugin_path, "utf-8"));
                 if (slug in LiteLoader.plugins) LiteLoader.api.plugin.delete(slug, false, false);
                 const config = LiteLoader.api.config.get("LiteLoader", default_config);
                 if (undone) delete config.installing_plugins[slug];
@@ -174,8 +174,8 @@ try {
 Object.defineProperty(globalThis, "LiteLoader", {
     configurable: false,
     get() {
-        const stack = new Error().stack.split("\n")[2];
-        if (whitelist.some(item => stack.includes(item))) {
+        const stack = new Error().stack?.split("\n")[2];
+        if (stack && whitelist.some(item => stack.includes(item))) {
             return LiteLoader;
         }
     }

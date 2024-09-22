@@ -2,7 +2,7 @@ import "./liteloader_api/main.js";
 import "./loader_core/plugin_loader.js";
 import "./main.js";
 
-import { app, dialog } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 import path from "path";
 import fs from "fs";
 
@@ -67,7 +67,8 @@ if (!isLatest) {
         }
 
         app.whenReady().then(() => {
-            dialog.showMessageBoxSync(null, {
+            const mainWindow = new BrowserWindow({ show: false });
+            dialog.showMessageBoxSync(mainWindow, {
                 type: "error",
                 title: "LiteLoaderQQNT",
                 message: "初始化失败！不用担心，这可能需要你手动移动某个文件夹解决\n"
